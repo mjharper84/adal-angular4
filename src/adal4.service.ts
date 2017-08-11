@@ -141,12 +141,17 @@ export class Adal4Service {
     const hash = window.location.hash;
     if (this.adalContext.isCallback(hash)) {
       const requestInfo = this.adalContext.getRequestInfo(hash);
+      
+                 if (requestInfo.requestType === 'UNKNOWN') {
+                requestInfo.requestType = this.adalContext.REQUEST_TYPE.RENEW_TOKEN;
+                requestInfo.stateMatch = true;
+            }
       this.adalContext.saveTokenFromHash(requestInfo);
       if (requestInfo.requestType === this.adalContext.REQUEST_TYPE.LOGIN) {
         this.updateDataFromCache(this.adalContext.config.loginResource);
 
       } else if (requestInfo.requestType === this.adalContext.REQUEST_TYPE.RENEW_TOKEN) {
-        this.adalContext.callback = window.parent.callBackMappedToRenewStates[requestInfo.stateResponse];
+        this.adalContext.callback = window.parent.callBackMappedToRenewStates[decodeURIComponent(requestInfo.stateResponse)];
       }
 
       if (requestInfo.stateMatch) {
